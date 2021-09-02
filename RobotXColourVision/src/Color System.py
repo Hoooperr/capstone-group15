@@ -1,6 +1,7 @@
 import cv2
 import time
 import numpy as np
+import Image
 
 # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
 color_dist = {"red": {"Lower": np.array([0, 60, 60]), "Upper": np.array([6, 255, 255])},
@@ -27,6 +28,9 @@ while cap.isOpened():
         ret, frame = cap.read()
         if frame is not None:
             if c % timeF == 0:
+                gs_frame = cv2.GaussianBlur(frame, (5, 5), 0)
+                hsv = cv2cvtColor(gas_frame, cv2.COLOR_BGR2HSV)
+                erode_hsv = cv2.erode(hsv, None, iterations=2)
                 cv2.imwrite("./Camera_image" + str(c/10) + '.jpg', frame)
             c += 1
             cv2.imshow("camera", frame)
