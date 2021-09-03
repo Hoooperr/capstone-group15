@@ -47,19 +47,10 @@ while cap.isOpened():
                 # Remove other colors in the recognized colors convert the image as a binary image
                 inRange_hsv = cv2.inRange(erode_hsv, color_dist['green']['Lower'], color_dist['green']['Upper'])
 
+
+               
                 cnt = cv2.findContours(inRange_hsv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                if cnt is not None:
-                    print(cnt)
-                else:
-                    inRange_hsv = cv2.inRange(erode_hsv, color_dist['red']['Lower'], color_dist['red']['Upper'])
-                    if cnt is not None:
-                        print("red")
-                    else:
-                        inRange_hsv = cv2.inRange(erode_hsv, color_dist['blue']['Lower'], color_dist['blue']['Upper'])
-                        if cnt is not None:
-                            print("blue")
-                        else:
-                            print("None")
+
 
                 # Save the binary image as a record to test
                 cv2.imwrite("./Camera_image" + str(c / 10) + '.jpg', inRange_hsv)
