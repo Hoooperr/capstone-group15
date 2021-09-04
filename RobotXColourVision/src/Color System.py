@@ -3,9 +3,9 @@ import time
 import numpy as np
 
 # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
-color_dist = {"red": {"Lower": np.array([0, 60, 60]), "Upper": np.array([6, 255, 255])},
-              "blue": {"Lower": np.array([100, 80, 46]), "Upper": np.array([124, 255, 255])},
-              "green": {"Lower": np.array([35, 43, 35]), "Upper": np.array([90, 255, 255])}
+color_dist = {"red": {"Lower": np.array([0, 60, 60]), "Upper": np.array([10, 255, 255])},
+              "blue": {"Lower": np.array([100, 43, 46]), "Upper": np.array([124, 255, 255])},
+              "green": {"Lower": np.array([35, 43, 46]), "Upper": np.array([77, 255, 255])}
               }
 
 # Indicates the camera is turned on.
@@ -19,7 +19,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 # Set a parameter, defined as the number of frames
 timeF = 10
 c = 1
-# num = 0
+font = cv2.FONT_HERSHEY_SIMPLEX
 
 # Determine the camera status. If return true means camera turn on success, false means fail.
 while cap.isOpened():
@@ -48,30 +48,40 @@ while cap.isOpened():
 
                 # Remove other colors in the recognized colors convert the image as a binary image
                 inRange_hsv_green = cv2.inRange(erode_hsv, color_dist['green']['Lower'], color_dist['green']['Upper'])
-                inRange_hsv_red = cv2.inRange(erode_hsv, color_dist['red']['Lower'], color_dist['red']['Upper'])
-                inRange_hsv_blue = cv2.inRange(erode_hsv, color_dist['blue']['Lower'], color_dist['blue']['Upper'])
+                inRange_hsv_red = cv2.inRange(erode_hsv, color_dist['red']['Lower'], color_dist['green']['Upper'])
+                inRange_hsv_blue = cv2.inRange(erode_hsv, color_dist['blue']['Lower'], color_dist['green']['Upper'])
 
-                result1 = not np.any(cv2.subtract(inRange_hsv_green, inRange_hsv_red))
-                result2 = not np.any(cv2.subtract(inRange_hsv_green, inRange_hsv_blue))
-                result3 = not np.any(cv2.subtract(inRange_hsv_blue, inRange_hsv_red))
+                contours_green, hierarchy_green = cv2.findContours(inRange_hsv_green, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+                contours_red, hierarchy_red = cv2.findContours(inRange_hsv_red, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+                contours_blue, hierarchy_blue = cv2.findContours(inRange_hsv_blue, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
-                if result1 == result2 == result3 == True:
-                    print("None")
-                if result1 == result2 == False & result3 == True:
+                for cnt in contours_green:
+                    (x, y, w, h) = cv2.boundingRect(cnt)
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
                     print("green")
                     # Save the binary image as a record to test
                     cv2.imwrite("./Camera_image" + str(c / 10) + '.jpg', inRange_hsv_green)
-                if result1 == result3 == False & result2 == True:
-                    print("red")
-                    # Save the binary image as a record to test
-                    cv2.imwrite("./Camera_image" + str(c / 10) + '.jpg', inRange_hsv_red)
-                if result2 == result3 == False & result1 == True:
+
+                for cnt1 in contours_blue:
+                    (x1, y1, w1, h1) = cv2.boundingRect(cnt1)
+                    cv2.rectangle(frame, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 255), 2)
                     print("blue")
                     # Save the binary image as a record to test
                     cv2.imwrite("./Camera_image" + str(c / 10) + '.jpg', inRange_hsv_blue)
+
+                for cnt2 in contours_red:
+                    (x2, y2, w2, h2) = cv2.boundingRect(cnt2)
+                    cv2.rectangle(frame, (x2, y2), (x2 + w2, y2 + h2), (0, 255, 255), 2)
+                    print("red")
+                    # Save the binary image as a record to test
+                    cv2.imwrite("./Camera_image" + str(c / 10) + '.jpg', inRange_hsv_red)
+                cv2.imshow("green", inRange_hsv_green)
+                cv2.imshow("blue", inRange_hsv_blue)
+                cv2.imshow("red", inRange_hsv_red)
             c += 1
 
             # Show the frame
+
             cv2.imshow("camera", frame)
             k = cv2.waitKey(1)
 
