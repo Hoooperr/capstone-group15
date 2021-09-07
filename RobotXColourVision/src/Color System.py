@@ -3,9 +3,9 @@ import time
 import numpy as np
 
 # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
-color_dist = {"red": {"Lower": np.array([0, 60, 60]), "Upper": np.array([10, 255, 255])},
-              "blue": {"Lower": np.array([100, 43, 46]), "Upper": np.array([124, 255, 255])},
-              "green": {"Lower": np.array([35, 43, 46]), "Upper": np.array([77, 255, 255])}
+color_dist = {"red": {"Lower": np.array([0, 200, 60]), "Upper": np.array([10, 255, 255])},
+              "blue": {"Lower": np.array([90, 60, 60]), "Upper": np.array([120, 255, 255])},
+              "green": {"Lower": np.array([40, 40, 40]), "Upper": np.array([75, 255, 255])}
               }
 
 # Indicates the camera is turned on.
@@ -14,6 +14,11 @@ cap = cv2.VideoCapture(0)  # The parameter 0 in VideoCapture function is built-i
 
 # Named the window camera
 cv2.namedWindow("camera")
+
+area_blue = 0
+area_red = 0
+area_green = 0
+max_area = 0
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 # Set a parameter, defined as the number of frames
@@ -55,26 +60,43 @@ while cap.isOpened():
                 contours_red, hierarchy_red = cv2.findContours(inRange_hsv_red, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
                 contours_blue, hierarchy_blue = cv2.findContours(inRange_hsv_blue, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
+                for i in contours_blue:
+                    area_blue += cv2.contourArea(i)
+
+                for i in contours_green:
+                    area_green += cv2.contourArea(i)
+
+                for i in contours_red:
+                    area_red += cv2.contourArea(i)
+
+                if area_blue > area_green:
+                    if area_green > area_red:
+                        print("blue")
+                    if area_blue < area_red:
+                        area_blue == area_red
+                print(area_blue)
+
                 for cnt in contours_green:
                     (x, y, w, h) = cv2.boundingRect(cnt)
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
-                    print("green")
+                    #print("green")
                     # Save the binary image as a record to test
                     cv2.imwrite("./Camera_image" + str(c / 10) + '.jpg', inRange_hsv_green)
 
                 for cnt1 in contours_blue:
                     (x1, y1, w1, h1) = cv2.boundingRect(cnt1)
                     cv2.rectangle(frame, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 255), 2)
-                    print("blue")
+                    #print("blue")
                     # Save the binary image as a record to test
                     cv2.imwrite("./Camera_image" + str(c / 10) + '.jpg', inRange_hsv_blue)
 
                 for cnt2 in contours_red:
                     (x2, y2, w2, h2) = cv2.boundingRect(cnt2)
                     cv2.rectangle(frame, (x2, y2), (x2 + w2, y2 + h2), (0, 255, 255), 2)
-                    print("red")
+                    #print("red")
                     # Save the binary image as a record to test
                     cv2.imwrite("./Camera_image" + str(c / 10) + '.jpg', inRange_hsv_red)
+
                 cv2.imshow("green", inRange_hsv_green)
                 cv2.imshow("blue", inRange_hsv_blue)
                 cv2.imshow("red", inRange_hsv_red)
