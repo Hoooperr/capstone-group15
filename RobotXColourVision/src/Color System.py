@@ -15,6 +15,7 @@ cap = cv2.VideoCapture(0)  # The parameter 0 in VideoCapture function is built-i
 # Named the window camera
 cv2.namedWindow("camera")
 
+result = 0
 area_blue = 0
 area_red = 0
 area_green = 0
@@ -24,7 +25,6 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 # Set a parameter, defined as the number of frames
 timeF = 10
 c = 1
-font = cv2.FONT_HERSHEY_SIMPLEX
 
 # Determine the camera status. If return true means camera turn on success, false means fail.
 while cap.isOpened():
@@ -53,12 +53,16 @@ while cap.isOpened():
 
                 # Remove other colors in the recognized colors convert the image as a binary image
                 inRange_hsv_green = cv2.inRange(erode_hsv, color_dist['green']['Lower'], color_dist['green']['Upper'])
-                inRange_hsv_red = cv2.inRange(erode_hsv, color_dist['red']['Lower'], color_dist['green']['Upper'])
-                inRange_hsv_blue = cv2.inRange(erode_hsv, color_dist['blue']['Lower'], color_dist['green']['Upper'])
+                inRange_hsv_red = cv2.inRange(erode_hsv, color_dist['red']['Lower'], color_dist['red']['Upper'])
+                inRange_hsv_blue = cv2.inRange(erode_hsv, color_dist['blue']['Lower'], color_dist['blue']['Upper'])
 
                 contours_green, hierarchy_green = cv2.findContours(inRange_hsv_green, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
                 contours_red, hierarchy_red = cv2.findContours(inRange_hsv_red, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
                 contours_blue, hierarchy_blue = cv2.findContours(inRange_hsv_blue, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+                area_blue = 0
+                area_red = 0
+                area_green = 0
 
                 for i in contours_blue:
                     area_blue += cv2.contourArea(i)
@@ -69,12 +73,16 @@ while cap.isOpened():
                 for i in contours_red:
                     area_red += cv2.contourArea(i)
 
-                if area_blue > area_green:
-                    if area_green > area_red:
-                        print("blue")
-                    if area_blue < area_red:
-                        area_blue == area_red
-                print(area_blue)
+                result = max(area_blue, area_green, area_red)
+                if result == area_blue:
+                    print("blue")
+
+                if result == area_red:
+                    print("red")
+
+                if result == area_green:
+                    print("green")
+
 
                 for cnt in contours_green:
                     (x, y, w, h) = cv2.boundingRect(cnt)
