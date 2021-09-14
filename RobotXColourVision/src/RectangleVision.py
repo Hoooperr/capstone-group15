@@ -4,7 +4,7 @@ import numpy as np
 # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
 color_dist = {"red": {"Lower": np.array([0, 150, 60]), "Upper": np.array([10, 255, 255])},
               "blue": {"Lower": np.array([95, 100, 60]), "Upper": np.array([120, 255, 255])},
-              "green": {"Lower": np.array([30, 40, 40]), "Upper": np.array([75, 255, 255])}
+              "green": {"Lower": np.array([30, 60, 60]), "Upper": np.array([75, 255, 255])}
               }
 
 cap = cv2.VideoCapture(0)
@@ -54,9 +54,17 @@ while cap.isOpened():
             box = cv2.boxPoints(minRect)
             box = np.int0(box)
 
+            shape_text = max_cnt[1]
+
+            # determine if shape is a rectangle
+            epsilon = 0.03 * cv2.arcLength(max_cnt[0], True)
+            poly_approx = cv2.approxPolyDP(max_cnt[0], epsilon, True)
+            if len(poly_approx) == 4:
+                shape_text += " rectangle"
+
             # draw rectangle contour to frame
             cv2.drawContours(frame, [box], 0, (0, 255, 0), 2)
-            cv2.putText(frame, max_cnt[1], (x+w+10, y+h), 0, 0.5, (0, 255, 0))
+            cv2.putText(frame, shape_text, (x+w+10, y+h), 0, 0.5, (0, 255, 0))
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1)
         if key == 27:
