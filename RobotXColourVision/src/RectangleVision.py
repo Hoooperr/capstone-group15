@@ -40,31 +40,30 @@ while cap.isOpened():
             if max_cnt is None or cv2.contourArea(cnt) > cv2.contourArea(max_cnt[0]):
                 max_cnt = (cnt, "blue")
 
-        #
         for cnt in cnts_green:
             if max_cnt is None or cv2.contourArea(cnt) > cv2.contourArea(max_cnt[0]):
                 max_cnt = (cnt, "green")
 
         if max_cnt is not None:
-            x, y, w, h = cv2.boundingRect(max_cnt[0])
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-
-            # find min area rectangle
-            minRect = cv2.minAreaRect(max_cnt[0])
-            box = cv2.boxPoints(minRect)
-            box = np.int0(box)
-
-            shape_text = max_cnt[1]
 
             # determine if shape is a rectangle
             epsilon = 0.03 * cv2.arcLength(max_cnt[0], True)
             poly_approx = cv2.approxPolyDP(max_cnt[0], epsilon, True)
-            if len(poly_approx) == 4:
-                shape_text += " rectangle"
 
-            # draw rectangle contour to frame
-            cv2.drawContours(frame, [box], 0, (0, 255, 0), 2)
-            cv2.putText(frame, shape_text, (x+w+10, y+h), 0, 0.5, (0, 255, 0))
+            # if shape has 4 sides
+            if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
+                x, y, w, h = cv2.boundingRect(max_cnt[0])
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+                # find min area rectangle
+                minRect = cv2.minAreaRect(max_cnt[0])
+                box = cv2.boxPoints(minRect)
+                box = np.int0(box)
+
+                # draw rectangle contour to frame
+                cv2.drawContours(frame, [poly_approx], 0, (0, 255, 0), 2)
+                cv2.putText(frame, "rectangle", (x + w + 10, y + h), 0, 0.5, (0, 255, 0))
+
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1)
         if key == 27:
