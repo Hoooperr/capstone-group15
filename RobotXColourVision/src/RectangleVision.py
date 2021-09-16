@@ -46,11 +46,11 @@ while cap.isOpened():
 
         if max_cnt is not None:
 
-            # determine if shape is a rectangle
+            # determine approximate shape
             epsilon = 0.03 * cv2.arcLength(max_cnt[0], True)
             poly_approx = cv2.approxPolyDP(max_cnt[0], epsilon, True)
 
-            # if shape has 4 sides
+            # if shape has 4 sides it is a rectangle
             if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
                 x, y, w, h = cv2.boundingRect(max_cnt[0])
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
