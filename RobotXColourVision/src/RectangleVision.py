@@ -4,6 +4,9 @@ import numpy as np
 def distanceToObject(known_width, focal_length, pixel_width):
     return (known_width * focal_length) / pixel_width
 
+def isVerticalLine(pos1, pos2):
+    return True if np.absolute(pos1[0] - pos2[0]) < np.absolute(pos1[1] - pos2[1]) else False
+
 
 # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
 color_dist = {"red": {"Lower": np.array([0, 150, 60]), "Upper": np.array([10, 255, 255])},
@@ -64,18 +67,21 @@ while cap.isOpened():
                 box = cv2.boxPoints(minRect)
                 box = np.int0(box)
 
-                # vertical and horizontal lengths of rectangle
-                side1 = np.linalg.norm(np.array(poly_approx[0]) - np.array(poly_approx[1]))
-                side2 = np.linalg.norm(np.array(poly_approx[0]) - np.array(poly_approx[3]))
+                corner1 = np.array(poly_approx[0]).flatten()
+                corner2 = np.array(poly_approx[1]).flatten()
+                corner3 = np.array(poly_approx[3]).flatten()
 
-                # rectangle dimensions
-                height = side1 if side1 < side2 else side2
+                # vertical and horizontal lengths of rectangle
+                side1 = np.linalg.norm(corner1 - corner2)
+                side2 = np.linalg.norm(corner1 - corner3)
+
+                height = side1 if isVerticalLine(corner1, corner2) else side2
                 width = side1 if height != side1 else side2
 
                 distance = distanceToObject(24, 520, width)
 
                 # draw rectangle contour to frame
-                cv2.drawContours(frame, [poly_approx], 0, (0, 255, 0), 2)
+                cv2.drawContours(frame, np.array(poly_approx), 0, (0, 255, 0), 2)
                 cv2.putText(frame, "rectangle", (x + w + 10, y + h), 0, 0.5, (0, 255, 0))
                 cv2.putText(frame, "%.2fcm" % distance, [int(x+(w/2)), int(y+(h/2))], 0, 0.5, (0, 255, 0))
 
