@@ -8,6 +8,15 @@ def distanceToObject(known_width, focal_length, pixel_width):
 def isVerticalLine(pos1, pos2):
     return True if np.absolute(pos1[0] - pos2[0]) < np.absolute(pos1[1] - pos2[1]) else False
 
+def perpendicularDistance(side1, side2):
+    side1 = sorted(side1, key=lambda p: (p[1], p[0]))
+    side2 = sorted(side2, key=lambda p: (p[1], p[0]))
+
+    side1_midpoint = np.subtract(side1[1], np.divide(np.subtract(side1[1], side1[0]), 2))
+    side2_midpoint = np.subtract(side2[1], np.divide(np.subtract(side2[1], side2[0]), 2))
+
+    return np.linalg.norm(side1_midpoint - side2_midpoint)
+
 
 cap = cv2.VideoCapture(0)
 
@@ -53,18 +62,32 @@ while cap.isOpened():
                 corner1 = np.array(poly_approx[0]).flatten()
                 corner2 = np.array(poly_approx[1]).flatten()
                 corner3 = np.array(poly_approx[3]).flatten()
+                corner4 = np.array(poly_approx[2]).flatten()
 
                 # vertical and horizontal lengths of rectangle
-                side1 = np.linalg.norm(corner1 - corner2)
-                side2 = np.linalg.norm(corner1 - corner3)
+                side_length1 = np.linalg.norm(corner1 - corner2)
+                side_length2 = np.linalg.norm(corner1 - corner3)
+                side_length3 = np.linalg.norm(corner4 - corner2)
+                side_length4 = np.linalg.norm(corner4 - corner3)
 
-                height = side1 if isVerticalLine(corner1, corner2) else side2
-                width = side1 if height != side1 else side2
+                left_side = np.array([corner1, corner2]) \
+                    if isVerticalLine(corner1, corner2) \
+                    else np.array([corner1, corner3])
+
+                right_side = np.array([corner4, corner2]) \
+                    if (left_side != np.array([corner1, corner2])).any() \
+                    else np.array([corner4, corner3])
+
+                print(perpendicularDistance(left_side, right_side))
+
+                height = side_length1 if isVerticalLine(corner1, corner2) else side_length2
+                width = side_length1 if height != side_length1 else side_length2
 
                 distance = distanceToObject(24, 520, width)
 
                 # draw rectangle contour to frame
                 cv2.drawContours(frame, [poly_approx], 0, (0, 255, 0), 2)
+
                 cv2.putText(frame, "rectangle", (x + w + 10, y + h), 0, 0.5, (0, 255, 0))
                 cv2.putText(frame, "%.2fcm" % distance, [int(x+(w/2)), int(y+(h/2))], 0, 0.5, (0, 255, 0))
 
