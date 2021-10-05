@@ -105,9 +105,9 @@ while cap.isOpened():
                     # Save the binary image as a record to test
                     cv2.imwrite("./Camera_image" + str(c / 10) + '.jpg', inRange_hsv_red)
 
-                cv2.imshow("green", inRange_hsv_green)
-                cv2.imshow("blue", inRange_hsv_blue)
-                cv2.imshow("red", inRange_hsv_red)
+                #cv2.imshow("green", inRange_hsv_green)
+                #cv2.imshow("blue", inRange_hsv_blue)
+                #cv2.imshow("red", inRange_hsv_red)
             c += 1
 
             # Show the frame
