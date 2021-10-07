@@ -56,14 +56,17 @@ while cap.isOpened():
                 inRange_hsv_red = cv2.inRange(erode_hsv, color_dist['red']['Lower'], color_dist['red']['Upper'])
                 inRange_hsv_blue = cv2.inRange(erode_hsv, color_dist['blue']['Lower'], color_dist['blue']['Upper'])
 
+                # Use findContours function to detect the binary image to reconigize the area
                 contours_green, hierarchy_green = cv2.findContours(inRange_hsv_green, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
                 contours_red, hierarchy_red = cv2.findContours(inRange_hsv_red, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
                 contours_blue, hierarchy_blue = cv2.findContours(inRange_hsv_blue, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
+                # Define the initial area
                 area_blue = 0
                 area_red = 0
                 area_green = 0
 
+                # Calculate the area of different color in binary inage
                 for i in contours_blue:
                     area_blue += cv2.contourArea(i)
 
@@ -73,6 +76,7 @@ while cap.isOpened():
                 for i in contours_red:
                     area_red += cv2.contourArea(i)
 
+                # print the color of max area in image
                 result = max(area_blue, area_green, area_red)
                 if result == area_blue:
                     print("blue")
@@ -83,7 +87,7 @@ while cap.isOpened():
                 if result == area_green:
                     print("green")
 
-
+                # Identify the color border
                 for cnt in contours_green:
                     (x, y, w, h) = cv2.boundingRect(cnt)
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
