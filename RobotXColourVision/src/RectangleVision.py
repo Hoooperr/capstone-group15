@@ -8,7 +8,10 @@ def distanceToObject(known_width, focal_length, pixel_width):
 def isVerticalLine(pos1, pos2):
     return True if np.absolute(pos1[0] - pos2[0]) < np.absolute(pos1[1] - pos2[1]) else False
 
-def perpendicularDistance(side1, side2):
+def perpendicularWidth(side1, side2):
+    """
+    shortest path between parallel sides
+    """
     side1 = sorted(side1, key=lambda p: (p[1], p[0]))
     side2 = sorted(side2, key=lambda p: (p[1], p[0]))
 
@@ -17,14 +20,16 @@ def perpendicularDistance(side1, side2):
 
     return np.linalg.norm(np.subtract(side1_midpoint, side2_midpoint))
 
-def calculateAngle(perpendicular_width, actual_width):
-
-    return actual_width
+def calculateAngle(perceived_height, ratio, perpendicular_width):
+    pixel_width = perceived_height/ratio
+    angle_increment = pixel_width/90
+    return 90 - perpendicular_width/angle_increment
 
 
 cap = cv2.VideoCapture(0)
 TARGET_WIDTH = 30  # cm
 TARGET_HEIGHT = 18  # cm
+RATIO = TARGET_HEIGHT/TARGET_WIDTH
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -57,7 +62,7 @@ while cap.isOpened():
             # if shape has 4 sides it is a rectangle
             if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
                 x, y, w, h = cv2.boundingRect(largest_contour_area[0])
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 232, 226), 2)
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                 # find min area rectangle
                 minRect = cv2.minAreaRect(largest_contour_area[0])
@@ -86,18 +91,33 @@ while cap.isOpened():
                 left_side_length = np.linalg.norm(np.subtract(left_side[0], left_side[1]))
                 right_side_length = np.linalg.norm(np.subtract(right_side[0], right_side[1]))
 
-                # print(perpendicularDistance(left_side, right_side))
+                left_right_separation = perpendicularWidth(left_side, right_side)
+
+                angle = -calculateAngle(left_side_length, RATIO, left_right_separation) \
+                    if left_side_length >= right_side_length \
+                    else calculateAngle(right_side_length, RATIO, left_right_separation)
 
                 height = side_length1 if isVerticalLine(corner1, corner2) else side_length2
                 width = side_length1 if height != side_length1 else side_length2
 
-                distance = (distanceToObject(TARGET_HEIGHT, 430, left_side_length) + distanceToObject(TARGET_HEIGHT, 430, right_side_length)) / 2
+                distance = (distanceToObject(TARGET_HEIGHT, 500, left_side_length) + distanceToObject(TARGET_HEIGHT, 500, right_side_length)) / 2
+
+                frame_midpoint = np.array((int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)/2), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)/2)))
+                target_midpoint = np.array((int(x+(w/2)), int(y+(h/2))))
+
+                pixels_from_centre = np.subtract(target_midpoint, frame_midpoint)
 
                 # draw rectangle contour to frame
-                cv2.drawContours(frame, [poly_approx], 0, (0, 232, 226), 2)
+                cv2.drawContours(frame, [poly_approx], 0, (0, 255, 0), 2)
 
-                cv2.putText(frame, "rectangle", (x + w + 10, y + h), 0, 0.5, (0, 232, 226))
-                cv2.putText(frame, "%.2fcm" % distance, [int(x+(w/2)), int(y+(h/2))], 0, 0.5, (0, 232, 226))
+                cv2.putText(frame, largest_contour_area[1], (x + w + 10, y + h), 0, 0.5, (0, 255, 0))
+                cv2.putText(frame, "%.2fcm" % distance, [int(x+(w/2)), int(y+(h/2))], 0, 0.5, (0, 255, 0))
+                cv2.putText(frame, "Viewing angle: %.2fdeg" % angle,
+                            [10, int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) - 50],
+                            0, 0.7, (0, 255, 0), 2)
+                cv2.putText(frame, "Position from centre: {}".format(pixels_from_centre),
+                            [10, int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) - 20],
+                            0, 0.7, (0, 255, 0), 2)
 
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1)
