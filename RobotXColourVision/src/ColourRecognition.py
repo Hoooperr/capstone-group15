@@ -24,3 +24,19 @@ def findRGBContours(frame):
     contours_green, heir_green = cv2.findContours(hsv_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     return contours_red, contours_blue, contours_green
+
+def getLargestContour(c_red, c_blue, c_green):
+    """find contour with largest area"""
+    largest_contour = None
+    for contour in c_red:
+        if largest_contour is None or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+            largest_contour = (contour, "red")
+
+    for contour in c_blue:
+        if largest_contour is None or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+            largest_contour = (contour, "blue")
+
+    for contour in c_green:
+        if largest_contour is None or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+            largest_contour = (contour, "green")
+    return largest_contour
