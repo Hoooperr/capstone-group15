@@ -10,8 +10,8 @@ color_dist = {"red": {"Lower": np.array([0, 200, 60]), "Upper": np.array([10, 25
               }
 
 # Indicates the camera is turned on.
-cap = cv2.VideoCapture(0)  # The parameter 0 in VideoCapture function is built-in camera
-# cap = cv2.VideoCapture(1)  # The parameter 1 in VideoCapture USB external camera
+#cap = cv2.VideoCapture(0)  # The parameter 0 in VideoCapture function is built-in camera
+cap = cv2.VideoCapture(1)  # The parameter 1 in VideoCapture USB external camera
 
 # Named the window camera
 cv2.namedWindow("camera")
@@ -118,10 +118,19 @@ while cap.isOpened():
                         if list[-1] != "black":
                             list.append("black")
 
-                index1 = list.index("black")
-                index2 = list.index("black", index1+1)
-                sequence = list[index1:index2]
-                print(sequence)
+
+                blackCount = 0
+                for i in list:
+                    if i == "black":
+                        blackCount += 1
+                #print(list)
+                if blackCount >= 2:
+                    index1 = list.index("black")
+                    index2 = list.index("black", index1+1)
+                    sequence = list[index1+1:index2]
+                    if len(sequence) == 3:
+
+                        print(sequence)
 
 
                 # Identify the color border
