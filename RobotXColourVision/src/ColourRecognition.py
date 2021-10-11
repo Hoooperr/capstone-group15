@@ -3,7 +3,7 @@ import numpy as np
 
 def findRGBContours(frame):
     # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
-    color_dist = {"red": {"Lower": np.array([0, 150, 60]), "Upper": np.array([10, 255, 255])},
+    color_dist = {"red": {"Lower": np.array([0, 175, 60]), "Upper": np.array([15, 255, 255])},
                   "blue": {"Lower": np.array([95, 100, 60]), "Upper": np.array([120, 255, 255])},
                   "green": {"Lower": np.array([30, 60, 60]), "Upper": np.array([75, 255, 255])}
                   }
@@ -24,3 +24,22 @@ def findRGBContours(frame):
     contours_green, heir_green = cv2.findContours(hsv_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     return contours_red, contours_blue, contours_green
+
+def getLargestContour(c_red=[], c_blue=[], c_green=[]):
+    """find contour with largest area"""
+    largest_contour = None
+    for contour in c_red:
+        if largest_contour is None or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+            largest_contour = (contour, "red")
+
+    for contour in c_blue:
+        if largest_contour is None or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+            largest_contour = (contour, "blue")
+
+    for contour in c_green:
+        if largest_contour is None or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+            largest_contour = (contour, "green")
+    return largest_contour
+
+def findTargetHoles():
+    pass
