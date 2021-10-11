@@ -25,7 +25,7 @@ def findRGBContours(frame):
 
     return contours_red, contours_blue, contours_green
 
-def getLargestContour(c_red, c_blue, c_green):
+def getLargestContour(c_red=[], c_blue=[], c_green=[]):
     """find contour with largest area"""
     largest_contour = None
     for contour in c_red:
@@ -40,3 +40,6 @@ def getLargestContour(c_red, c_blue, c_green):
         if largest_contour is None or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
             largest_contour = (contour, "green")
     return largest_contour
+
+def findTargetHoles():
+    pass

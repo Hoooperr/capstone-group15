@@ -28,20 +28,26 @@ def on_change(value):
     pass
 
 
-TARGET_WIDTH = 30  # cm
-TARGET_HEIGHT = 18  # cm
-RATIO = TARGET_HEIGHT/TARGET_WIDTH
-
 cap = cv2.VideoCapture(0)
 cv2.namedWindow("Frame")
-cv2.namedWindow("Configuration")
+cv2.namedWindow("Configuration", cv2.WINDOW_AUTOSIZE)
+image = np.zeros((45, 500, 3), np.uint8)
+image[:] = (0, 0, 0)
+cv2.imshow("Configuration", image)
+
 cv2.createTrackbar('focalLen', "Configuration", 500, 600, on_change)
+cv2.createTrackbar('width', "Configuration", 30, 50, on_change)
+cv2.createTrackbar('height', "Configuration", 18, 50, on_change)
 cv2.createTrackbar('red', "Configuration", 1, 1, on_change)
 cv2.createTrackbar('green', "Configuration", 1, 1, on_change)
 cv2.createTrackbar('blue', "Configuration", 1, 1, on_change)
 
 while cap.isOpened():
     ret, frame = cap.read()
+
+    TARGET_WIDTH = cv2.getTrackbarPos("width", "Configuration")
+    TARGET_HEIGHT = cv2.getTrackbarPos("height", "Configuration")
+    RATIO = TARGET_HEIGHT / TARGET_WIDTH
 
     if ret:
         contours_red, contours_blue, contours_green = cr.findRGBContours(frame)
@@ -87,9 +93,9 @@ while cap.isOpened():
                     if left_side_length >= right_side_length \
                     else calculateAngle(right_side_length, RATIO, left_right_separation)
 
-                focal_length = cv2.getTrackbarPos("focalLen", "Configuration")
-                distance = (distanceToObject(TARGET_HEIGHT, focal_length, left_side_length)
-                            + distanceToObject(TARGET_HEIGHT, focal_length, right_side_length)) / 2
+                focal_len = cv2.getTrackbarPos("focalLen", "Configuration")
+                distance = (distanceToObject(TARGET_HEIGHT, focal_len, left_side_length)
+                            + distanceToObject(TARGET_HEIGHT, focal_len, right_side_length)) / 2
 
                 # Find the position of the targeted object relative to the centre of frame
                 frame_midpoint = np.array((int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)/2),
