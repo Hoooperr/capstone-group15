@@ -20,8 +20,8 @@ def perpendicularWidth(side1, side2):
 
 
 def calculateAngle(perceived_height, ratio, perpendicular_width):
-    pixel_width = perceived_height/ratio
-    angle_increment = pixel_width/90
+    pixel_width = perceived_height / ratio
+    angle_increment = pixel_width / 90
     return 90 - perpendicular_width/angle_increment
 
 def on_change(value):
@@ -50,22 +50,22 @@ while cap.isOpened():
     RATIO = TARGET_HEIGHT / TARGET_WIDTH
 
     if ret:
-        contours_red, contours_blue, contours_green = cr.findRGBContours(frame)
+        contours_red, contours_blue, contours_green, contours_black = cr.findRGBContours(frame)
 
-        largest_contour_area = cr.getLargestContour(
+        largest_contour = cr.getLargestContour(
             contours_red if cv2.getTrackbarPos("red", "Configuration") == 1 else [],
             contours_blue if cv2.getTrackbarPos("blue", "Configuration") == 1 else [],
             contours_green if cv2.getTrackbarPos("green", "Configuration") == 1 else [])
 
-        if largest_contour_area is not None:
+        if largest_contour is not None:
 
             # determine approximate shape
-            epsilon = 0.03 * cv2.arcLength(largest_contour_area[0], True)
-            poly_approx = cv2.approxPolyDP(largest_contour_area[0], epsilon, True)
+            epsilon = 0.03 * cv2.arcLength(largest_contour[0], True)
+            poly_approx = cv2.approxPolyDP(largest_contour[0], epsilon, True)
 
             # if shape has 4 sides it is a rectangle
             if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
-                x, y, w, h = cv2.boundingRect(largest_contour_area[0])
+                x, y, w, h = cv2.boundingRect(largest_contour[0])
 
                 # (x,y) coordinates of each corner of shape
                 corner1 = np.array(poly_approx[0]).flatten()
@@ -103,10 +103,15 @@ while cap.isOpened():
                 target_midpoint = np.array((int(x+(w/2)), int(y+(h/2))))
                 pixels_from_centre = np.subtract(target_midpoint, frame_midpoint)
 
+                target = cr.findTargetHoles(contours_black)
+
+                if target != []:
+                    cv2.drawContours(frame, [target], 0, (0, 0, 255), 2)
+
                 # draw rectangle contour to frame
                 cv2.drawContours(frame, [poly_approx], 0, (0, 255, 0), 2)
 
-                cv2.putText(frame, largest_contour_area[1], (x + w + 10, y + h), 0, 0.5, (0, 255, 0))
+                cv2.putText(frame, largest_contour[1], (x + w + 10, y + h), 0, 0.5, (0, 255, 0))
                 cv2.putText(frame, "%.2fcm" % distance, [int(x+(w/2)), int(y+(h/2))], 0, 0.5, (0, 255, 0))
                 cv2.putText(frame, "Viewing angle: %.2fdeg" % angle,
                             [10, int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) - 50],

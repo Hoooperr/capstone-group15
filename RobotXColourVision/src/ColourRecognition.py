@@ -5,8 +5,9 @@ def findRGBContours(frame):
     # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
     color_dist = {"red": {"Lower": np.array([0, 175, 60]), "Upper": np.array([15, 255, 255])},
                   "blue": {"Lower": np.array([95, 100, 60]), "Upper": np.array([120, 255, 255])},
-                  "green": {"Lower": np.array([30, 60, 60]), "Upper": np.array([75, 255, 255])}
-                  }
+                  "green": {"Lower": np.array([30, 60, 60]), "Upper": np.array([75, 255, 255])},
+                  "black": {"Lower": np.array([0, 0, 0]), "Upper": np.array([180, 255, 50])}}
+
     # masking
     blurred = cv2.GaussianBlur(frame, (3, 3), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
@@ -17,13 +18,15 @@ def findRGBContours(frame):
     hsv_red = cv2.inRange(erode, color_dist['red']['Lower'], color_dist['red']['Upper'])
     hsv_blue = cv2.inRange(erode, color_dist['blue']['Lower'], color_dist['blue']['Upper'])
     hsv_green = cv2.inRange(erode, color_dist['green']['Lower'], color_dist['green']['Upper'])
+    hsv_black = cv2.inRange(erode, color_dist['black']['Lower'], color_dist['black']['Upper'])
 
     # get all contours for each colour
     contours_red, heir_red = cv2.findContours(hsv_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contours_blue, heir_blue = cv2.findContours(hsv_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contours_green, heir_green = cv2.findContours(hsv_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours_black, heir_black = cv2.findContours(hsv_black, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    return contours_red, contours_blue, contours_green
+    return contours_red, contours_blue, contours_green, contours_black
 
 def getLargestContour(c_red=[], c_blue=[], c_green=[]):
     """find contour with largest area"""
@@ -41,5 +44,17 @@ def getLargestContour(c_red=[], c_blue=[], c_green=[]):
             largest_contour = (contour, "green")
     return largest_contour
 
-def findTargetHoles():
-    pass
+def findTargetHoles(contours_black):
+    largest_target = []
+    for contour in contours_black:
+        if largest_target == [] or cv2.contourArea(contour) > cv2.contourArea(largest_target[0]):
+            largest_target = (contour, "target")
+
+    if len(largest_target) > 0:
+        # determine approximate shape
+        epsilon = 0.03 * cv2.arcLength(largest_target[0], True)
+        poly_approx = cv2.approxPolyDP(largest_target[0], epsilon, True)
+
+        if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
+            return poly_approx
+    return []
