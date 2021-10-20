@@ -28,33 +28,45 @@ def findRGBContours(frame):
 
     return contours_red, contours_blue, contours_green, contours_black
 
-def getLargestContour(c_red=[], c_blue=[], c_green=[]):
+def getLargestContour(c_red=[], c_blue=[], c_green=[], c_black=[]):
     """find contour with largest area"""
-    largest_contour = None
+    largest_contour = []
     for contour in c_red:
-        if largest_contour is None or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+        if largest_contour == [] or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
             largest_contour = (contour, "red")
 
     for contour in c_blue:
-        if largest_contour is None or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+        if largest_contour == [] or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
             largest_contour = (contour, "blue")
 
     for contour in c_green:
-        if largest_contour is None or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+        if largest_contour == [] or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
             largest_contour = (contour, "green")
+
+    for contour in c_black:
+        if largest_contour == [] or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+            largest_contour = (contour, "black")
+
     return largest_contour
 
 def findTargetHoles(contours_black):
-    largest_target = []
-    for contour in contours_black:
-        if largest_target == [] or cv2.contourArea(contour) > cv2.contourArea(largest_target[0]):
-            largest_target = (contour, "target")
 
-    if len(largest_target) > 0:
-        # determine approximate shape
-        epsilon = 0.03 * cv2.arcLength(largest_target[0], True)
-        poly_approx = cv2.approxPolyDP(largest_target[0], epsilon, True)
+    contours_black = sorted(contours_black, key=lambda x: cv2.contourArea(x), reverse=True)
+    if len(contours_black) > 1:
+        targets = contours_black[:2]
+    elif len(contours_black) > 0:
+        targets = contours_black[0]
+    else:
+        targets = []
 
-        if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
-            return poly_approx
+    target_rects = []
+    if len(targets) > 0:
+        for contour in targets:
+            # determine approximate shape
+            epsilon = 0.03 * cv2.arcLength(contour, True)
+            poly_approx = cv2.approxPolyDP(contour, epsilon, True)
+
+            if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
+                target_rects.append(poly_approx)
+        return target_rects
     return []

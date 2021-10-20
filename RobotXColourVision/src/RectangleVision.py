@@ -57,7 +57,7 @@ while cap.isOpened():
             contours_blue if cv2.getTrackbarPos("blue", "Configuration") == 1 else [],
             contours_green if cv2.getTrackbarPos("green", "Configuration") == 1 else [])
 
-        if largest_contour is not None:
+        if largest_contour != []:
 
             # determine approximate shape
             epsilon = 0.03 * cv2.arcLength(largest_contour[0], True)
@@ -97,16 +97,19 @@ while cap.isOpened():
                 distance = (distanceToObject(TARGET_HEIGHT, focal_len, left_side_length)
                             + distanceToObject(TARGET_HEIGHT, focal_len, right_side_length)) / 2
 
-                # Find the position of the targeted object relative to the centre of frame
+                # find the position of the targeted object relative to the centre of frame
                 frame_midpoint = np.array((int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)/2),
                                            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)/2)))
-                target_midpoint = np.array((int(x+(w/2)), int(y+(h/2))))
-                pixels_from_centre = np.subtract(target_midpoint, frame_midpoint)
+                object_midpoint = np.array((int(x+(w/2)), int(y+(h/2))))
+                pixels_from_centre = np.subtract(object_midpoint, frame_midpoint)
 
-                target = cr.findTargetHoles(contours_black)
-
-                if target != []:
-                    cv2.drawContours(frame, [target], 0, (0, 0, 255), 2)
+                # finds target holes (Dock and Deliver)
+                targets = cr.findTargetHoles(contours_black)
+                if targets != []:
+                    for target in targets:
+                        (tx, ty, tw, th) = cv2.boundingRect(target)
+                        cv2.rectangle(frame, (tx, ty), (tx+tw, ty+th), (0, 0, 255), 2)
+                        cv2.putText(frame, "target", (tx + tw + 10, ty + th), 0, 0.5, (0, 0, 255))
 
                 # draw rectangle contour to frame
                 cv2.drawContours(frame, [poly_approx], 0, (0, 255, 0), 2)
