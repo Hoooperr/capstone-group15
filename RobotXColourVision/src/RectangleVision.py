@@ -11,7 +11,7 @@ def isVerticalLine(pos1, pos2):
 
 
 def perpendicularWidth(side1, side2):
-    """ shortest path between parallel sides """
+    """shortest path between parallel sides"""
     side1 = sorted(side1, key=lambda p: (p[1], p[0]))
     side2 = sorted(side2, key=lambda p: (p[1], p[0]))
     side1_midpoint = np.subtract(side1[1], np.divide(np.subtract(side1[1], side1[0]), 2))
@@ -25,6 +25,7 @@ def calculateAngle(perceived_height, ratio, perpendicular_width):
     return 90 - perpendicular_width/angle_increment
 
 def on_change(value):
+    """do nothing function"""
     pass
 
 
@@ -32,7 +33,7 @@ cap = cv2.VideoCapture(0)
 cv2.namedWindow("Frame")
 cv2.namedWindow("Configuration", cv2.WINDOW_AUTOSIZE)
 image = np.zeros((45, 500, 3), np.uint8)
-image[:] = (0, 0, 0)
+image[:] = (0, 0, 0)      # placeholder for trackbars
 cv2.imshow("Configuration", image)
 
 cv2.createTrackbar('focalLen', "Configuration", 500, 600, on_change)
@@ -103,13 +104,15 @@ while cap.isOpened():
                 object_midpoint = np.array((int(x+(w/2)), int(y+(h/2))))
                 pixels_from_centre = np.subtract(object_midpoint, frame_midpoint)
 
-                # finds target holes (Dock and Deliver)
-                targets = cr.findTargetHoles(contours_black)
-                if targets != []:
-                    for target in targets:
-                        (tx, ty, tw, th) = cv2.boundingRect(target)
-                        cv2.rectangle(frame, (tx, ty), (tx+tw, ty+th), (0, 0, 255), 2)
-                        cv2.putText(frame, "target", (tx + tw + 10, ty + th), 0, 0.5, (0, 0, 255))
+                # search for target holes when vessel is close and centred in front of the correct dock
+                if distance < 200 and abs(pixels_from_centre[0]) < 50 and abs(angle) < 10:
+                    # finds target holes (Dock and Deliver task)
+                    targets = cr.findTargetHoles(contours_black)
+                    if targets != []:
+                        for target in targets:
+                            (tx, ty, tw, th) = cv2.boundingRect(target)
+                            cv2.rectangle(frame, (tx, ty), (tx+tw, ty+th), (0, 0, 255), 2)
+                            cv2.putText(frame, "target", (tx + tw + 10, ty + th), 0, 0.5, (0, 0, 255))
 
                 # draw rectangle contour to frame
                 cv2.drawContours(frame, [poly_approx], 0, (0, 255, 0), 2)

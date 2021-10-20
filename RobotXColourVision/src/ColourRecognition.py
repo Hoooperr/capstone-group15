@@ -50,7 +50,7 @@ def getLargestContour(c_red=[], c_blue=[], c_green=[], c_black=[]):
     return largest_contour
 
 def findTargetHoles(contours_black):
-
+    """find and return the contours of the two target holes"""
     contours_black = sorted(contours_black, key=lambda x: cv2.contourArea(x), reverse=True)
     if len(contours_black) > 1:
         targets = contours_black[:2]
@@ -68,5 +68,11 @@ def findTargetHoles(contours_black):
 
             if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
                 target_rects.append(poly_approx)
+            else:
+                try:
+                    targets.append(contours_black[len(targets)])
+                except IndexError:
+                    print("Only one target detected")
+        print(len(target_rects))
         return target_rects
     return []
