@@ -1,6 +1,35 @@
 import cv2
 import time
+import datetime
 import numpy as np
+
+
+def output(list=[]):
+    for i in range(0, 3):
+        if list[i] == 'red':
+            color = "\033[41m  \033[0m"
+        if list[i] == 'blue':
+            color = "\033[44m  \033[0m"
+        if list[i] == 'green':
+            color = "\033[42m  \033[0m"
+    return "    Scan the Code   /n" + list[0] + "  " + list[1] + "  " + list[
+        2] + "/n" + color + "  " + color + "  " + color
+
+
+def nmea(list=[]):
+    for i in range(0, 3):
+        if list[i] == 'red':
+            char = 'R'
+        if list[i] == 'blue':
+            char = 'B'
+        if list[i] == 'green':
+            char = 'G'
+    date = datetime.datetime.now.strftime('%d%m%Y')
+    time = datetime.datetime.now.strftime('%H%M%S')
+    teamID = ''
+    checksum = ''
+    return "$RXCOD," + date + "," + time + teamID + "," + char + char + char + "*" + checksum
+
 
 # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
 color_dist = {"red": {"Lower": np.array([0, 200, 60]), "Upper": np.array([10, 255, 255])},
@@ -10,7 +39,7 @@ color_dist = {"red": {"Lower": np.array([0, 200, 60]), "Upper": np.array([10, 25
               }
 
 # Indicates the camera is turned on.
-#cap = cv2.VideoCapture(0)  # The parameter 0 in VideoCapture function is built-in camera
+# cap = cv2.VideoCapture(0)  # The parameter 0 in VideoCapture function is built-in camera
 cap = cv2.VideoCapture(1)  # The parameter 1 in VideoCapture USB external camera
 
 # Named the window camera
@@ -24,7 +53,6 @@ area_black = 0
 max_area = 0
 count = 0
 list = []
-
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 # Set a parameter, defined as the number of frames
@@ -63,10 +91,14 @@ while cap.isOpened():
                 inRange_hsv_black = cv2.inRange(erode_hsv, color_dist['black']['Lower'], color_dist['black']['Upper'])
 
                 # Use findContours function to detect the binary image to recognize the area
-                contours_green, hierarchy_green = cv2.findContours(inRange_hsv_green, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-                contours_red, hierarchy_red = cv2.findContours(inRange_hsv_red, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-                contours_blue, hierarchy_blue = cv2.findContours(inRange_hsv_blue, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-                contours_black, hierarchy_black = cv2.findContours(inRange_hsv_black, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+                contours_green, hierarchy_green = cv2.findContours(inRange_hsv_green, cv2.RETR_EXTERNAL,
+                                                                   cv2.CHAIN_APPROX_NONE)
+                contours_red, hierarchy_red = cv2.findContours(inRange_hsv_red, cv2.RETR_EXTERNAL,
+                                                               cv2.CHAIN_APPROX_NONE)
+                contours_blue, hierarchy_blue = cv2.findContours(inRange_hsv_blue, cv2.RETR_EXTERNAL,
+                                                                 cv2.CHAIN_APPROX_NONE)
+                contours_black, hierarchy_black = cv2.findContours(inRange_hsv_black, cv2.RETR_EXTERNAL,
+                                                                   cv2.CHAIN_APPROX_NONE)
 
                 # Define the initial area
                 area_blue = 0
@@ -90,6 +122,7 @@ while cap.isOpened():
                 # print the color of max area in image
                 result = max(area_blue, area_green, area_red, area_black)
 
+                # choose the color with the largest area in the binary image as the main
                 if result == area_blue:
                     if len(list) == 0:
                         list.append("blue")
@@ -118,20 +151,20 @@ while cap.isOpened():
                         if list[-1] != "black":
                             list.append("black")
 
-
+                # find the color between two blacks as the correct color according to the array of color sequence
                 blackCount = 0
                 for i in list:
                     if i == "black":
                         blackCount += 1
-                #print(list)
+                # print(list)
                 if blackCount >= 2:
                     index1 = list.index("black")
-                    index2 = list.index("black", index1+1)
-                    sequence = list[index1+1:index2]
+                    index2 = list.index("black", index1 + 1)
+                    sequence = list[index1 + 1:index2]
                     if len(sequence) == 3:
-
                         print(sequence)
-
+                        #output(sequence)
+                        #nmea(sequence)
 
                 # Identify the color border
                 for cnt in contours_green:
@@ -158,10 +191,10 @@ while cap.isOpened():
                     # Save the binary image as a record to test
                     cv2.imwrite("./Camera_image" + str(c / 10) + '.jpg', inRange_hsv_red)
 
-                #cv2.imshow("green", inRange_hsv_green)
-                #cv2.imshow("blue", inRange_hsv_blue)
-                #cv2.imshow("red", inRange_hsv_red)
-                #cv2.imshow("black", inRange_hsv_black)
+                # cv2.imshow("green", inRange_hsv_green)
+                # cv2.imshow("blue", inRange_hsv_blue)
+                # cv2.imshow("red", inRange_hsv_red)
+                # cv2.imshow("black", inRange_hsv_black)
             c += 1
 
             # Show the frame
