@@ -32,8 +32,8 @@ def on_change(value):
 cap = cv2.VideoCapture(0)
 cv2.namedWindow("Frame")
 cv2.namedWindow("Configuration", cv2.WINDOW_AUTOSIZE)
-image = np.zeros((45, 500, 3), np.uint8)
-image[:] = (0, 0, 0)      # placeholder for trackbars
+image = np.zeros((45, 500, 3), np.uint8)    # placeholder image for configuration window
+image[:] = (0, 0, 0)
 cv2.imshow("Configuration", image)
 
 cv2.createTrackbar('focalLen', "Configuration", 500, 600, on_change)
