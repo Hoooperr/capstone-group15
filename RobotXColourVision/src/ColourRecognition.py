@@ -73,6 +73,5 @@ def findTargetHoles(contours_black):
                     targets.append(contours_black[len(targets)])
                 except IndexError:
                     print("Only one target detected")
-        print(len(target_rects))
         return target_rects
     return []

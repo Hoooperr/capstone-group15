@@ -53,12 +53,13 @@ while cap.isOpened():
     if ret:
         contours_red, contours_blue, contours_green, contours_black = cr.findRGBContours(frame)
 
+        # determines which colours to search for in each frame
         largest_contour = cr.getLargestContour(
             contours_red if cv2.getTrackbarPos("red", "Configuration") == 1 else [],
             contours_blue if cv2.getTrackbarPos("blue", "Configuration") == 1 else [],
             contours_green if cv2.getTrackbarPos("green", "Configuration") == 1 else [])
 
-        if largest_contour != []:
+        if largest_contour:
 
             # determine approximate shape
             epsilon = 0.03 * cv2.arcLength(largest_contour[0], True)
@@ -108,15 +109,14 @@ while cap.isOpened():
                 if distance < 200 and abs(pixels_from_centre[0]) < 50 and abs(angle) < 10:
                     # finds target holes (Dock and Deliver task)
                     targets = cr.findTargetHoles(contours_black)
-                    if targets != []:
+                    if targets:
                         for target in targets:
                             (tx, ty, tw, th) = cv2.boundingRect(target)
                             cv2.rectangle(frame, (tx, ty), (tx+tw, ty+th), (0, 0, 255), 2)
                             cv2.putText(frame, "target", (tx + tw + 10, ty + th), 0, 0.5, (0, 0, 255))
 
-                # draw rectangle contour to frame
+                # draw contours and text to the frame window
                 cv2.drawContours(frame, [poly_approx], 0, (0, 255, 0), 2)
-
                 cv2.putText(frame, largest_contour[1], (x + w + 10, y + h), 0, 0.5, (0, 255, 0))
                 cv2.putText(frame, "%.2fcm" % distance, [int(x+(w/2)), int(y+(h/2))], 0, 0.5, (0, 255, 0))
                 cv2.putText(frame, "Viewing angle: %.2fdeg" % angle,
