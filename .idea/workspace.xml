@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="699c0a11-4443-4921-85ad-731f8625d613" name="Changes" comment="Changes">
-      <change beforePath="$PROJECT_DIR$/.idea/capstone-group15.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/capstone-group15.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RobotXColourVision/src/Color System.py" beforeDir="false" afterPath="$PROJECT_DIR$/RobotXColourVision/src/Color System.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RobotXColourVision/src/ColourRecognition.py" beforeDir="false" afterPath="$PROJECT_DIR$/RobotXColourVision/src/ColourRecognition.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RobotXColourVision/src/RectangleVision.py" beforeDir="false" afterPath="$PROJECT_DIR$/RobotXColourVision/src/RectangleVision.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,6 +32,7 @@
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
