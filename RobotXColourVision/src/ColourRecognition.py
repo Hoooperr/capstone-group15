@@ -2,16 +2,26 @@ import cv2
 import numpy as np
 
 def findRGBContours(frame):
+    """Detects all the red, blue, green and black contours within the frame.
+       returns all red, blue, green and black contours"""
     # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
     color_dist = {"red": {"Lower": np.array([0, 175, 60]), "Upper": np.array([15, 255, 255])},
-                  "blue": {"Lower": np.array([95, 100, 60]), "Upper": np.array([120, 255, 255])},
-                  "green": {"Lower": np.array([30, 60, 60]), "Upper": np.array([75, 255, 255])},
+                  "blue": {"Lower": np.array([100, 150, 60]), "Upper": np.array([125, 255, 255])},
+                  "green": {"Lower": np.array([38, 60, 60]), "Upper": np.array([85, 255, 255])},
                   "black": {"Lower": np.array([0, 0, 0]), "Upper": np.array([180, 255, 50])}}
 
     # masking
+    # Perform Gaussian Blur processing on the original image to facilitate color extraction.
+    # (5,5) is the width and length of Gaussian Matrix
+    # 0 is the standard of deviation
     blurred = cv2.GaussianBlur(frame, (3, 3), 0)
+    # Convert Gaussian Blur image from BRG to HSV is more suitable for single color extraction.
+    # OpenCV used rather BRG than RGB
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+
     kernel = np.ones((5, 5), np.uint8)
+    # Make the image thinner and remove the noise in the image
+    # Iteration represent the erode width
     erode = cv2.erode(hsv, kernel)
 
     # allows only objects of red, green or blue to appear in their respective frame
@@ -28,26 +38,28 @@ def findRGBContours(frame):
 
     return contours_red, contours_blue, contours_green, contours_black
 
+
 def getLargestContour(c_red=[], c_blue=[], c_green=[], c_black=[]):
     """find contour with largest area"""
-    largest_contour = []
+    largest_contour = ()
     for contour in c_red:
-        if largest_contour == [] or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+        if not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
             largest_contour = (contour, "red")
 
     for contour in c_blue:
-        if largest_contour == [] or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+        if not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
             largest_contour = (contour, "blue")
 
     for contour in c_green:
-        if largest_contour == [] or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+        if not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
             largest_contour = (contour, "green")
 
     for contour in c_black:
-        if largest_contour == [] or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
+        if not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
             largest_contour = (contour, "black")
 
     return largest_contour
+
 
 def findTargetHoles(contours_black):
     """find and return the contours of the two target holes"""
@@ -72,6 +84,50 @@ def findTargetHoles(contours_black):
                 try:
                     targets.append(contours_black[len(targets)])
                 except IndexError:
-                    print("Only one target detected")
+                    pass
         return target_rects
     return []
+
+
+def detectColourSequence(raw_sequence):
+    temp_sequence = []
+    detected_sequence = []
+    
+    if len(raw_sequence) < 100:
+        # remove consecutive duplicate colours
+        for i in range(len(raw_sequence)):
+            if not temp_sequence or raw_sequence[i - 1] != raw_sequence[i]:
+                temp_sequence.append(raw_sequence[i])
+
+        # find the indexes of all black in temp_sequence
+        black_indexes = [index for index, value in enumerate(temp_sequence) if value == "black"]
+        if len(black_indexes) > 1:
+
+            # if two non-consecutive black have been detected, take a slice between the two
+            temp_sequence = temp_sequence[black_indexes[0] + 1:black_indexes[1]]
+
+            # if slice has a length of 3 then it must contain the colour sequence
+            if len(temp_sequence) == 3:
+                detected_sequence = temp_sequence
+                print("SEQUENCE DETECTED")
+                showSequence(detected_sequence)
+
+            raw_sequence = []
+
+    else: raw_sequence = []
+
+    return detected_sequence, raw_sequence
+
+
+def showSequence(sequence):
+    colour_list = []
+    for index in range(3):
+        if sequence[index] == 'red':
+            colour_list.append("\033[41m  \033[0m")
+        elif sequence[index] == 'blue':
+            colour_list.append("\033[44m  \033[0m")
+        elif sequence[index] == 'green':
+            colour_list.append("\033[42m  \033[0m")
+
+    print("Scan the Code:\n" + colour_list[0] + "  " + colour_list[1] + "  " + colour_list[2])
+    return
