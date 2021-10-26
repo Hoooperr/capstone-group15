@@ -28,7 +28,6 @@ cv2.namedWindow("camera")
 sequence_list = []
 final_sequence = []
 foundSequence = False
-font = cv2.FONT_HERSHEY_SIMPLEX
 # Set a parameter, defined as the number of frames
 frameRate = cap.get(cv2.CAP_PROP_FPS)/6
 

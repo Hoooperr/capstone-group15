@@ -6,8 +6,8 @@ def findRGBContours(frame):
        returns all red, blue, green and black contours"""
     # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
     color_dist = {"red": {"Lower": np.array([0, 175, 60]), "Upper": np.array([15, 255, 255])},
-                  "blue": {"Lower": np.array([95, 100, 60]), "Upper": np.array([120, 255, 255])},
-                  "green": {"Lower": np.array([30, 60, 60]), "Upper": np.array([75, 255, 255])},
+                  "blue": {"Lower": np.array([100, 150, 60]), "Upper": np.array([125, 255, 255])},
+                  "green": {"Lower": np.array([38, 60, 60]), "Upper": np.array([85, 255, 255])},
                   "black": {"Lower": np.array([0, 0, 0]), "Upper": np.array([180, 255, 50])}}
 
     # masking
@@ -84,7 +84,7 @@ def findTargetHoles(contours_black):
                 try:
                     targets.append(contours_black[len(targets)])
                 except IndexError:
-                    print("Only one target detected")
+                    pass
         return target_rects
     return []
 
@@ -92,26 +92,29 @@ def findTargetHoles(contours_black):
 def detectColourSequence(raw_sequence):
     temp_sequence = []
     detected_sequence = []
+    
+    if len(raw_sequence) < 100:
+        # remove consecutive duplicate colours
+        for i in range(len(raw_sequence)):
+            if not temp_sequence or raw_sequence[i - 1] != raw_sequence[i]:
+                temp_sequence.append(raw_sequence[i])
 
-    # remove consecutive duplicate colours
-    for i in range(len(raw_sequence)):
-        if not temp_sequence or raw_sequence[i - 1] != raw_sequence[i]:
-            temp_sequence.append(raw_sequence[i])
+        # find the indexes of all black in temp_sequence
+        black_indexes = [index for index, value in enumerate(temp_sequence) if value == "black"]
+        if len(black_indexes) > 1:
 
-    # find the indexes of all black in temp_sequence
-    black_indexes = [index for index, value in enumerate(temp_sequence) if value == "black"]
-    if len(black_indexes) > 1:
+            # if two non-consecutive black have been detected, take a slice between the two
+            temp_sequence = temp_sequence[black_indexes[0] + 1:black_indexes[1]]
 
-        # if two non-consecutive black have been detected, take a slice between the two
-        temp_sequence = temp_sequence[black_indexes[0] + 1:black_indexes[1]]
+            # if slice has a length of 3 then it must contain the colour sequence
+            if len(temp_sequence) == 3:
+                detected_sequence = temp_sequence
+                print("SEQUENCE DETECTED")
+                showSequence(detected_sequence)
 
-        # if slice has a length of 3 then it must contain the colour sequence
-        if len(temp_sequence) == 3:
-            detected_sequence = temp_sequence
-            print("SEQUENCE DETECTED")
-            showSequence(detected_sequence)
+            raw_sequence = []
 
-        raw_sequence = []
+    else: raw_sequence = []
 
     return detected_sequence, raw_sequence
 
