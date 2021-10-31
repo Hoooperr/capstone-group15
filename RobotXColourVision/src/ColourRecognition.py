@@ -4,13 +4,13 @@ import numpy as np
 def findRGBContours(frame):
     """Detects all the red, blue, green and black contours within the frame.
        returns all red, blue, green and black contours"""
-    # define a dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
-    color_dist = {"red": {"Lower": np.array([0, 175, 60]), "Upper": np.array([15, 255, 255])},
-                  "blue": {"Lower": np.array([100, 150, 60]), "Upper": np.array([125, 255, 255])},
+    # dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
+    # Edit these value to adjust the shades of each colour that recognised by the system.
+    color_dist = {"red": {"Lower": np.array([0, 200, 100]), "Upper": np.array([12, 255, 255])},
+                  "blue": {"Lower": np.array([100, 200, 100]), "Upper": np.array([117, 255, 255])},
                   "green": {"Lower": np.array([38, 60, 60]), "Upper": np.array([85, 255, 255])},
                   "black": {"Lower": np.array([0, 0, 0]), "Upper": np.array([180, 255, 50])}}
 
-    # masking
     # Perform Gaussian Blur processing on the original image to facilitate color extraction.
     # (5,5) is the width and length of Gaussian Matrix
     # 0 is the standard of deviation
@@ -37,29 +37,6 @@ def findRGBContours(frame):
     contours_black, heir_black = cv2.findContours(hsv_black, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     return contours_red, contours_blue, contours_green, contours_black
-
-
-def getLargestContour(c_red=[], c_blue=[], c_green=[], c_black=[]):
-    """find contour with largest area"""
-    largest_contour = ()
-    for contour in c_red:
-        if not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
-            largest_contour = (contour, "red")
-
-    for contour in c_blue:
-        if not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
-            largest_contour = (contour, "blue")
-
-    for contour in c_green:
-        if not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
-            largest_contour = (contour, "green")
-
-    for contour in c_black:
-        if not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0]):
-            largest_contour = (contour, "black")
-
-    return largest_contour
-
 
 def findTargetHoles(contours_black):
     """find and return the contours of the two target holes"""

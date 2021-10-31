@@ -1,6 +1,27 @@
 import numpy as np
 import cv2
 
+def getLargestContour(c_red=[], c_blue=[], c_green=[], c_black=[]):
+    """find contour with largest area"""
+    largest_contour = ()
+    for contour in c_red:
+        if (not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0])) and getRectangle(contour).size > 0:
+            largest_contour = (contour, "red")
+
+    for contour in c_blue:
+        if (not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0])) and getRectangle(contour).size > 0:
+            largest_contour = (contour, "blue")
+
+    for contour in c_green:
+        if (not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0])) and getRectangle(contour).size > 0:
+            largest_contour = (contour, "green")
+
+    for contour in c_black:
+        if (not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0])) and getRectangle(contour).size > 0:
+            largest_contour = (contour, "black")
+
+    return largest_contour
+
 def getRectangle(contour):
     # determine approximate shape
     epsilon = 0.03 * cv2.arcLength(contour, True)
@@ -17,12 +38,13 @@ def distanceToObject(known_width, focal_length, pixel_width):
     return (known_width * focal_length) / pixel_width
 
 
-def isVerticalLine(pos1, pos2):
-    return True if np.absolute(pos1[0] - pos2[0]) < np.absolute(pos1[1] - pos2[1]) else False
+def isVerticalLine(a, b):
+    """returns true if the x difference is less than the y difference"""
+    return True if np.absolute(a[0] - b[0]) < np.absolute(a[1] - b[1]) else False
 
 
 def perpendicularWidth(side1, side2):
-    """shortest distance between parallel sides"""
+    """the distance between parallel sides"""
     side1 = sorted(side1, key=lambda p: (p[1], p[0]))
     side2 = sorted(side2, key=lambda p: (p[1], p[0]))
     side1_midpoint = np.subtract(side1[1], np.divide(np.subtract(side1[1], side1[0]), 2))
