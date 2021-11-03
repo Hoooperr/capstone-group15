@@ -106,5 +106,5 @@ def showSequence(sequence):
         elif sequence[index] == 'green':
             colour_list.append("\033[42m  \033[0m")
     print(sequence)
-    print("Scan the Code:\n" + colour_list[0] + "  " + colour_list[1] + "  " + colour_list[2] + "\n\n")
+    print("Scan the Code:\n" + colour_list[0] + "  " + colour_list[1] + "  " + colour_list[2])
     return
