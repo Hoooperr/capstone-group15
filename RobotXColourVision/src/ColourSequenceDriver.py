@@ -39,7 +39,7 @@ def main():
             contours_red, contours_blue, contours_green, contours_black = cr.findRGBContours(frame)     
 
             # determines which colours to search for in each frame
-            largest_contour = cr.getLargestContour(
+            largest_contour = rr.getLargestContour(
                 contours_red if cv2.getTrackbarPos("red", "Configuration") == 1 else [],
                 contours_blue if cv2.getTrackbarPos("blue", "Configuration") == 1 else [],
                 contours_green if cv2.getTrackbarPos("green", "Configuration") == 1 else [])
