@@ -7,8 +7,8 @@ def findRGBContours(frame):
     # dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
     # Edit these value to adjust the shades of each colour that recognised by the system.
     color_dist = {"red": {"Lower": np.array([0, 200, 100]), "Upper": np.array([12, 255, 255])},
-                  "blue": {"Lower": np.array([100, 200, 100]), "Upper": np.array([117, 255, 255])},
-                  "green": {"Lower": np.array([38, 60, 60]), "Upper": np.array([85, 255, 255])},
+                  "blue": {"Lower": np.array([100, 175, 100]), "Upper": np.array([113, 255, 255])},
+                  "green": {"Lower": np.array([38, 60, 100]), "Upper": np.array([85, 255, 255])},
                   "black": {"Lower": np.array([0, 0, 0]), "Upper": np.array([180, 255, 50])}}
 
     # Perform Gaussian Blur processing on the original image to facilitate color extraction.
@@ -86,7 +86,7 @@ def detectColourSequence(raw_sequence):
             # if slice has a length of 3 then it must contain the colour sequence
             if len(temp_sequence) == 3:
                 detected_sequence = temp_sequence
-                print("SEQUENCE DETECTED")
+                print("\033c" + "SEQUENCE DETECTED")
                 showSequence(detected_sequence)
 
             raw_sequence = []
@@ -105,6 +105,6 @@ def showSequence(sequence):
             colour_list.append("\033[44m  \033[0m")
         elif sequence[index] == 'green':
             colour_list.append("\033[42m  \033[0m")
-
-    print("Scan the Code:\n" + colour_list[0] + "  " + colour_list[1] + "  " + colour_list[2])
+    print(sequence)
+    print("Scan the Code:\n" + colour_list[0] + "  " + colour_list[1] + "  " + colour_list[2] + "\n\n")
     return

@@ -22,6 +22,7 @@ def main():
     cv2.createTrackbar('green', "Configuration", 1, 1, on_change)
     cv2.createTrackbar('blue', "Configuration", 1, 1, on_change)
 
+    loading = 0
     sequence_list = []  # frame by frame sequence data
     final_sequence = [] # output of sequence recognition
     foundSequence = False
@@ -48,14 +49,20 @@ def main():
 
             # Attempt to identify the colour sequence until it is successfully identified
             if not foundSequence and frameId % np.floor(frameRate) == 0:
+                if loading <= 3:
+                    print("\033c" + "Capturing colour sequence" + "."*loading)
+                    loading += 1
+                else: 
+                    loading = 0
 
                 if isValidContour:
                     # choose the color with the largest area in the binary image as the main
                     sequence_list.append(largest_contour[1])
                 else:
                     sequence_list.append("black")
-
+                
                 final_sequence, sequence_list = cr.detectColourSequence(sequence_list)
+                
                 foundSequence = True if final_sequence else False  
 
             if isValidContour: 
@@ -108,6 +115,7 @@ def main():
                     pixels_from_centre = np.subtract(object_centrepoint, frame_centrepoint)
 
                     inPosition = True if (distance < 200 and abs(pixels_from_centre[0]) < 50 and abs(angle) < 10) else False
+                    inPosition = False
 
                     # search for target holes when vessel is close and centred in front of the correct dock
                     if foundSequence and inPosition:
