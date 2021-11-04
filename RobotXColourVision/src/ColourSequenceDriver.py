@@ -88,14 +88,23 @@ def main():
                     corner4 = np.array(rectangle[2]).flatten()
 
                     # vertical sides must be either left side or right side
-                    left_side = np.array([corner1, corner2]) \
-                        if rr.isVerticalLine(corner1, corner2) \
-                        else np.array([corner1, corner3])
+                    if (corner1[0] < corner4[0]):
+                        left_side = np.array([corner1, corner2]) \
+                            if rr.isVerticalLine(corner1, corner2) \
+                            else np.array([corner1, corner3])
 
-                    right_side = np.array([corner4, corner2]) \
-                        if (left_side != np.array([corner1, corner2])).any() \
-                        else np.array([corner4, corner3])
-
+                        right_side = np.array([corner4, corner2]) \
+                            if (left_side != np.array([corner1, corner2])).any() \
+                            else np.array([corner4, corner3])
+                    else:
+                        left_side = np.array([corner4, corner2]) \
+                            if (left_side != np.array([corner1, corner2])).any() \
+                            else np.array([corner4, corner3])
+                        
+                        right_side = np.array([corner1, corner2]) \
+                            if rr.isVerticalLine(corner1, corner2) \
+                            else np.array([corner1, corner3])
+                    
                     left_side_length = np.linalg.norm(np.subtract(left_side[0], left_side[1]))
                     right_side_length = np.linalg.norm(np.subtract(right_side[0], right_side[1]))
 
@@ -106,7 +115,7 @@ def main():
                     # Indicates to the vessel what direction it needs to move in 
                     # order to position itself directly in front of the object.
                     angle = -rr.calculateAngle(left_side_length, RATIO, left_right_separation) \
-                        if left_side_length >= right_side_length \
+                        if left_side_length > right_side_length \
                         else rr.calculateAngle(right_side_length, RATIO, left_right_separation)
 
                     focal_len = cv2.getTrackbarPos("focalLen", "Configuration")
