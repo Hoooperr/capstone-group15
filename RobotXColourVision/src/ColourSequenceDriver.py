@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 import ColourRecognition as cr
@@ -6,6 +7,12 @@ import RectangleRecognition as rr
 def on_change(value):
     """do nothing function"""
     pass
+
+def clearConsole():
+    command = 'clear'
+    if os.name in ('nt', 'dos'):  # If Machine is running on Windows, use cls
+        command = 'cls'
+    os.system(command)
 
 def main():
     cap = cv2.VideoCapture(0)
@@ -50,7 +57,8 @@ def main():
             # Attempt to identify the colour sequence until it is successfully identified
             if not foundSequence and frameId % np.floor(frameRate) == 0:
                 if loading <= 3:
-                    print("\033c" + "Capturing colour sequence" + "."*loading)
+                    clearConsole()
+                    print("Capturing colour sequence" + "."*loading)
                     loading += 1
                 else: 
                     loading = 0

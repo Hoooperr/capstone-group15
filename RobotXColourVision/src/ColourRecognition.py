@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import ColourSequenceDriver as csd
 
 def findRGBContours(frame):
     """Detects all the red, blue, green and black contours within the frame.
@@ -86,7 +87,8 @@ def detectColourSequence(raw_sequence):
             # if slice has a length of 3 then it must contain the colour sequence
             if len(temp_sequence) == 3:
                 detected_sequence = temp_sequence
-                print("\033c" + "SEQUENCE DETECTED")
+                csd.clearConsole()
+                print("SEQUENCE DETECTED")
                 showSequence(detected_sequence)
 
             raw_sequence = []
