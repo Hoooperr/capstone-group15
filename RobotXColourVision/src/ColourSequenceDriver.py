@@ -56,6 +56,7 @@ def main():
 
             # Attempt to identify the colour sequence until it is successfully identified
             if not foundSequence and frameId % np.floor(frameRate) == 0:
+                
                 if loading <= 3:
                     clearConsole()
                     print("Capturing colour sequence" + "."*loading)
@@ -132,7 +133,6 @@ def main():
                     pixels_from_centre = np.subtract(object_centrepoint, frame_centrepoint)
 
                     inPosition = True if (distance < 200 and abs(pixels_from_centre[0]) < 50 and abs(angle) < 10) else False
-                    inPosition = False
 
                     # search for target holes when vessel is close and centred in front of the correct dock
                     if foundSequence and inPosition:
