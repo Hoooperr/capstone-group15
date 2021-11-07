@@ -15,7 +15,7 @@ def clearConsole():
     os.system(command)
 
 def main():
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0) # Change to 1 to use secondary camera
     cv2.namedWindow("Frame")
     cv2.namedWindow("Configuration", cv2.WINDOW_AUTOSIZE)
     image = np.zeros((45, 500, 3), np.uint8)    # placeholder image for configuration window
