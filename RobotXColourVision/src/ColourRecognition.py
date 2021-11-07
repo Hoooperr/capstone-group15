@@ -40,6 +40,7 @@ def findRGBContours(frame):
     return contours_red, contours_blue, contours_green, contours_black
 
 def detectColourSequence(raw_sequence):
+    """Identifies the colour sequence within the raw sequence list"""
     temp_sequence = []
     detected_sequence = []
     
@@ -71,6 +72,7 @@ def detectColourSequence(raw_sequence):
 
 
 def showSequence(sequence):
+    """display colour sequence to standard output"""
     colour_list = []
     for index in range(3):
         if sequence[index] == 'red':

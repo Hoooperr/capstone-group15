@@ -10,7 +10,7 @@ def on_change(value):
 
 def clearConsole():
     command = 'clear'
-    if os.name in ('nt', 'dos'):  # If Machine is running on Windows, use cls
+    if os.name in ('nt', 'dos'):
         command = 'cls'
     os.system(command)
 
@@ -157,8 +157,10 @@ def main():
 
             cv2.imshow("Frame", frame)
             key = cv2.waitKey(1)
+            # Terminate program - ESC
             if key == 27:
                 break
+            # Restart Sequence Capturing- P
             elif key == 80:
                 foundSequence = False
             elif cv2.getWindowProperty("Frame", cv2.WND_PROP_VISIBLE) < 1:
