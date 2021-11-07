@@ -15,7 +15,7 @@ def clearConsole():
     os.system(command)
 
 def main():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     cv2.namedWindow("Frame")
     cv2.namedWindow("Configuration", cv2.WINDOW_AUTOSIZE)
     image = np.zeros((45, 500, 3), np.uint8)    # placeholder image for configuration window
@@ -89,7 +89,7 @@ def main():
                     corner4 = np.array(rectangle[2]).flatten()
 
                     # vertical sides must be either left side or right side
-                    if (corner1[0] < corner4[0]):
+                    if corner1[0] < corner4[0]:
                         left_side = np.array([corner1, corner2]) \
                             if rr.isVerticalLine(corner1, corner2) \
                             else np.array([corner1, corner3])
@@ -159,6 +159,8 @@ def main():
             key = cv2.waitKey(1)
             if key == 27:
                 break
+            elif key == 80:
+                foundSequence = False
             elif cv2.getWindowProperty("Frame", cv2.WND_PROP_VISIBLE) < 1:
                 break
             elif cv2.getWindowProperty("Configuration", cv2.WND_PROP_VISIBLE) < 1:

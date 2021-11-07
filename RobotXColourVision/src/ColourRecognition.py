@@ -7,7 +7,7 @@ def findRGBContours(frame):
        returns all red, blue, green and black contours"""
     # dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
     # Edit these value to adjust the shades of each colour that recognised by the system.
-    color_dist = {"red": {"Lower": np.array([0, 200, 100]), "Upper": np.array([12, 255, 255])},
+    color_dist = {"red": {"Lower": np.array([0, 200, 46]), "Upper": np.array([12, 255, 255])},
                   "blue": {"Lower": np.array([100, 175, 100]), "Upper": np.array([113, 255, 255])},
                   "green": {"Lower": np.array([38, 60, 100]), "Upper": np.array([85, 255, 255])},
                   "black": {"Lower": np.array([0, 0, 0]), "Upper": np.array([180, 255, 50])}}
