@@ -23,7 +23,7 @@ def getLargestContour(c_red=[], c_blue=[], c_green=[], c_black=[]):
     return largest_contour
 
 def getRectangle(contour):
-    # determine approximate shape
+    """tests if the contour is a rectangle and returns the approximated contour"""
     epsilon = 0.03 * cv2.arcLength(contour, True)
     poly_approx = cv2.approxPolyDP(contour, epsilon, True)
 
@@ -33,9 +33,36 @@ def getRectangle(contour):
     else:
         return np.array([])
 
+def findTargetHoles(contours_black):
+    """returns the contours of the two target holes if they are located within the frame"""
+    contours_black = sorted(contours_black, key=lambda x: cv2.contourArea(x), reverse=True)
+    if len(contours_black) > 1:
+        targets = contours_black[:2]
+    elif len(contours_black) > 0:
+        targets = contours_black[0]
+    else:
+        targets = []
 
-def distanceToObject(known_width, focal_length, pixel_width):
-    return (known_width * focal_length) / pixel_width
+    target_rects = []
+    if len(targets) > 0:
+        for contour in targets:
+            # determine approximate shape
+            epsilon = 0.03 * cv2.arcLength(contour, True)
+            poly_approx = cv2.approxPolyDP(contour, epsilon, True)
+
+            if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
+                target_rects.append(poly_approx)
+            else:
+                try:
+                    targets.append(contours_black[len(targets)])
+                except IndexError:
+                    pass
+        return target_rects
+    return []
+
+def distanceToObject(known_length, focal_length, pixel_width):
+    """returns the distance between the camera and the object"""
+    return (known_length * focal_length) / pixel_width
 
 
 def isVerticalLine(a, b):
@@ -53,6 +80,7 @@ def perpendicularWidth(side1, side2):
 
 
 def calculateAngle(perceived_height, ratio, perpendicular_width):
+    """returns the angle the rectangle is viewed from"""
     pixel_width = perceived_height / ratio
     angle_increment = pixel_width / 90
     return 90 - perpendicular_width/angle_increment

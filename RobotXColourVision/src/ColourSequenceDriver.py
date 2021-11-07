@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 import ColourRecognition as cr
@@ -7,8 +8,14 @@ def on_change(value):
     """do nothing function"""
     pass
 
+def clearConsole():
+    command = 'clear'
+    if os.name in ('nt', 'dos'):
+        command = 'cls'
+    os.system(command)
+
 def main():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0) # Change to 1 to use secondary camera
     cv2.namedWindow("Frame")
     cv2.namedWindow("Configuration", cv2.WINDOW_AUTOSIZE)
     image = np.zeros((45, 500, 3), np.uint8)    # placeholder image for configuration window
@@ -22,6 +29,7 @@ def main():
     cv2.createTrackbar('green', "Configuration", 1, 1, on_change)
     cv2.createTrackbar('blue', "Configuration", 1, 1, on_change)
 
+    loading = 0
     sequence_list = []  # frame by frame sequence data
     final_sequence = [] # output of sequence recognition
     foundSequence = False
@@ -48,14 +56,22 @@ def main():
 
             # Attempt to identify the colour sequence until it is successfully identified
             if not foundSequence and frameId % np.floor(frameRate) == 0:
+                
+                if loading <= 3:
+                    clearConsole()
+                    print("Capturing colour sequence" + "."*loading)
+                    loading += 1
+                else: 
+                    loading = 0
 
                 if isValidContour:
                     # choose the color with the largest area in the binary image as the main
                     sequence_list.append(largest_contour[1])
                 else:
                     sequence_list.append("black")
-
+                
                 final_sequence, sequence_list = cr.detectColourSequence(sequence_list)
+                
                 foundSequence = True if final_sequence else False  
 
             if isValidContour: 
@@ -73,14 +89,23 @@ def main():
                     corner4 = np.array(rectangle[2]).flatten()
 
                     # vertical sides must be either left side or right side
-                    left_side = np.array([corner1, corner2]) \
-                        if rr.isVerticalLine(corner1, corner2) \
-                        else np.array([corner1, corner3])
+                    if corner1[0] < corner4[0]:
+                        left_side = np.array([corner1, corner2]) \
+                            if rr.isVerticalLine(corner1, corner2) \
+                            else np.array([corner1, corner3])
 
-                    right_side = np.array([corner4, corner2]) \
-                        if (left_side != np.array([corner1, corner2])).any() \
-                        else np.array([corner4, corner3])
-
+                        right_side = np.array([corner4, corner2]) \
+                            if (left_side != np.array([corner1, corner2])).any() \
+                            else np.array([corner4, corner3])
+                    else:
+                        left_side = np.array([corner4, corner2]) \
+                            if (left_side != np.array([corner1, corner2])).any() \
+                            else np.array([corner4, corner3])
+                        
+                        right_side = np.array([corner1, corner2]) \
+                            if rr.isVerticalLine(corner1, corner2) \
+                            else np.array([corner1, corner3])
+                    
                     left_side_length = np.linalg.norm(np.subtract(left_side[0], left_side[1]))
                     right_side_length = np.linalg.norm(np.subtract(right_side[0], right_side[1]))
 
@@ -91,7 +116,7 @@ def main():
                     # Indicates to the vessel what direction it needs to move in 
                     # order to position itself directly in front of the object.
                     angle = -rr.calculateAngle(left_side_length, RATIO, left_right_separation) \
-                        if left_side_length >= right_side_length \
+                        if left_side_length > right_side_length \
                         else rr.calculateAngle(right_side_length, RATIO, left_right_separation)
 
                     focal_len = cv2.getTrackbarPos("focalLen", "Configuration")
@@ -112,7 +137,7 @@ def main():
                     # search for target holes when vessel is close and centred in front of the correct dock
                     if foundSequence and inPosition:
                         # finds target holes (Dock and Deliver task)
-                        targets = cr.findTargetHoles(contours_black)
+                        targets = rr.findTargetHoles(contours_black)
                         if targets:
                             for target in targets:
                                 (tx, ty, tw, th) = cv2.boundingRect(target)
@@ -132,8 +157,12 @@ def main():
 
             cv2.imshow("Frame", frame)
             key = cv2.waitKey(1)
+            # Terminate program - ESC
             if key == 27:
                 break
+            # Restart Sequence Capturing- P
+            elif key == 80:
+                foundSequence = False
             elif cv2.getWindowProperty("Frame", cv2.WND_PROP_VISIBLE) < 1:
                 break
             elif cv2.getWindowProperty("Configuration", cv2.WND_PROP_VISIBLE) < 1:
