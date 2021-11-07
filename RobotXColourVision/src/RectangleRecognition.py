@@ -33,6 +33,32 @@ def getRectangle(contour):
     else:
         return np.array([])
 
+def findTargetHoles(contours_black):
+    """find and return the contours of the two target holes"""
+    contours_black = sorted(contours_black, key=lambda x: cv2.contourArea(x), reverse=True)
+    if len(contours_black) > 1:
+        targets = contours_black[:2]
+    elif len(contours_black) > 0:
+        targets = contours_black[0]
+    else:
+        targets = []
+
+    target_rects = []
+    if len(targets) > 0:
+        for contour in targets:
+            # determine approximate shape
+            epsilon = 0.03 * cv2.arcLength(contour, True)
+            poly_approx = cv2.approxPolyDP(contour, epsilon, True)
+
+            if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
+                target_rects.append(poly_approx)
+            else:
+                try:
+                    targets.append(contours_black[len(targets)])
+                except IndexError:
+                    pass
+        return target_rects
+    return []
 
 def distanceToObject(known_width, focal_length, pixel_width):
     return (known_width * focal_length) / pixel_width

@@ -6,7 +6,7 @@ def findRGBContours(frame):
     """Detects all the red, blue, green and black contours within the frame.
        returns all red, blue, green and black contours"""
     # dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
-    # Edit these value to adjust the shades of each colour that recognised by the system.
+    # Edit these value to adjust the shades of each colour that are recognised by the system if it is performing badly.
     color_dist = {"red": {"Lower": np.array([0, 200, 46]), "Upper": np.array([12, 255, 255])},
                   "blue": {"Lower": np.array([100, 175, 100]), "Upper": np.array([113, 255, 255])},
                   "green": {"Lower": np.array([38, 60, 100]), "Upper": np.array([85, 255, 255])},
@@ -38,34 +38,6 @@ def findRGBContours(frame):
     contours_black, heir_black = cv2.findContours(hsv_black, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     return contours_red, contours_blue, contours_green, contours_black
-
-def findTargetHoles(contours_black):
-    """find and return the contours of the two target holes"""
-    contours_black = sorted(contours_black, key=lambda x: cv2.contourArea(x), reverse=True)
-    if len(contours_black) > 1:
-        targets = contours_black[:2]
-    elif len(contours_black) > 0:
-        targets = contours_black[0]
-    else:
-        targets = []
-
-    target_rects = []
-    if len(targets) > 0:
-        for contour in targets:
-            # determine approximate shape
-            epsilon = 0.03 * cv2.arcLength(contour, True)
-            poly_approx = cv2.approxPolyDP(contour, epsilon, True)
-
-            if len(poly_approx) == 4 and cv2.contourArea(poly_approx) > 500:
-                target_rects.append(poly_approx)
-            else:
-                try:
-                    targets.append(contours_black[len(targets)])
-                except IndexError:
-                    pass
-        return target_rects
-    return []
-
 
 def detectColourSequence(raw_sequence):
     temp_sequence = []

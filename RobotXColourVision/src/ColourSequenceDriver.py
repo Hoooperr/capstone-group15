@@ -137,7 +137,7 @@ def main():
                     # search for target holes when vessel is close and centred in front of the correct dock
                     if foundSequence and inPosition:
                         # finds target holes (Dock and Deliver task)
-                        targets = cr.findTargetHoles(contours_black)
+                        targets = rr.findTargetHoles(contours_black)
                         if targets:
                             for target in targets:
                                 (tx, ty, tw, th) = cv2.boundingRect(target)
