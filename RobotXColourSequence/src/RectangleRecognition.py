@@ -3,6 +3,7 @@ import cv2
 
 def getLargestContour(c_red=[], c_blue=[], c_green=[], c_black=[]):
     """find contour with largest area"""
+
     largest_contour = ()
     for contour in c_red:
         if (not largest_contour or cv2.contourArea(contour) > cv2.contourArea(largest_contour[0])) and getRectangle(contour).size > 0:
@@ -22,8 +23,10 @@ def getLargestContour(c_red=[], c_blue=[], c_green=[], c_black=[]):
 
     return largest_contour
 
+
 def getRectangle(contour):
     """tests if the contour is a rectangle and returns the approximated contour"""
+
     epsilon = 0.03 * cv2.arcLength(contour, True)
     poly_approx = cv2.approxPolyDP(contour, epsilon, True)
 
@@ -33,8 +36,10 @@ def getRectangle(contour):
     else:
         return np.array([])
 
+
 def findTargetHoles(contours_black):
     """returns the contours of the two target holes if they are located within the frame"""
+
     contours_black = sorted(contours_black, key=lambda x: cv2.contourArea(x), reverse=True)
     if len(contours_black) > 1:
         targets = contours_black[:2]
@@ -60,18 +65,22 @@ def findTargetHoles(contours_black):
         return target_rects
     return []
 
+
 def distanceToObject(known_length, focal_length, pixel_width):
     """returns the distance between the camera and the object"""
+
     return (known_length * focal_length) / pixel_width
 
 
 def isVerticalLine(a, b):
     """returns true if the x difference is less than the y difference"""
+
     return True if np.absolute(a[0] - b[0]) < np.absolute(a[1] - b[1]) else False
 
 
 def perpendicularWidth(side1, side2):
     """the distance between parallel sides"""
+
     side1 = sorted(side1, key=lambda p: (p[1], p[0]))
     side2 = sorted(side2, key=lambda p: (p[1], p[0]))
     side1_midpoint = np.subtract(side1[1], np.divide(np.subtract(side1[1], side1[0]), 2))
@@ -81,6 +90,7 @@ def perpendicularWidth(side1, side2):
 
 def calculateAngle(perceived_height, ratio, perpendicular_width):
     """returns the angle the rectangle is viewed from"""
+
     pixel_width = perceived_height / ratio
     angle_increment = pixel_width / 90
     return 90 - perpendicular_width/angle_increment
