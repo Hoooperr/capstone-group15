@@ -5,6 +5,7 @@ import ColourSequenceDriver as csd
 def findRGBContours(frame):
     """Detects all the red, blue, green and black contours within the frame.
        returns all red, blue, green and black contours"""
+
     # dictionary containing the range of H(Hue), S(Saturation), V(Value) of red, green and blue
     # Edit these value to adjust the shades of each colour that are recognised by the system if it is performing badly.
     color_dist = {"red": {"Lower": np.array([0, 200, 46]), "Upper": np.array([12, 255, 255])},
@@ -16,13 +17,14 @@ def findRGBContours(frame):
     # (5,5) is the width and length of Gaussian Matrix
     # 0 is the standard of deviation
     blurred = cv2.GaussianBlur(frame, (3, 3), 0)
+
     # Convert Gaussian Blur image from BRG to HSV is more suitable for single color extraction.
     # OpenCV used rather BRG than RGB
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-    kernel = np.ones((5, 5), np.uint8)
     # Make the image thinner and remove the noise in the image
     # Iteration represent the erode width
+    kernel = np.ones((5, 5), np.uint8)
     erode = cv2.erode(hsv, kernel)
 
     # allows only objects of red, green or blue to appear in their respective frame
@@ -41,6 +43,7 @@ def findRGBContours(frame):
 
 def detectColourSequence(raw_sequence):
     """Identifies the colour sequence within the raw sequence list"""
+    
     temp_sequence = []
     detected_sequence = []
     
@@ -73,6 +76,7 @@ def detectColourSequence(raw_sequence):
 
 def showSequence(sequence):
     """display colour sequence to standard output"""
+
     colour_list = []
     for index in range(3):
         if sequence[index] == 'red':
